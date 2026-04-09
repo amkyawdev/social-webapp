@@ -6,6 +6,11 @@ import ThreeLoader from '@/components/ui/ThreeLoader'
 export const metadata: Metadata = {
   title: 'Social App - Pastel Glassmorphism',
   description: 'A beautiful social webapp with Neo-3D design',
+  icons: {
+    icon: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
+  manifest: '/manifest.json',
 }
 
 export default function RootLayout({
