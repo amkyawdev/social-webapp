@@ -9,12 +9,12 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
   // Public routes that don't require auth
-  const publicPaths = ['/auth/login', '/auth/signup', '/_next', '/favicon', '/public']
+  const publicPaths = ['/auth/login', '/auth/signup', '/_next', '/favicon', '/public', '/']
   
   const path = request.nextUrl.pathname
   
-  // Allow public paths
-  if (publicPaths.some(p => path.startsWith(p))) {
+  // Allow public paths including home page
+  if (path === '/' || publicPaths.some(p => path.startsWith(p))) {
     return NextResponse.next()
   }
 
