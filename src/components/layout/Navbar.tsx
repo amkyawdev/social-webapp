@@ -4,12 +4,14 @@
  * Navbar Component
  * Responsive navigation bar with desktop and mobile layouts
  * Features glassmorphism design with blob FAB button for mobile menu
+ * Includes authentication state
  * @module components/layout/Navbar
  */
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import NavbarAuth from './NavbarAuth'
 
 /**
  * Navigation item structure
@@ -68,7 +70,7 @@ export default function Navbar() {
           ))}
         </div>
         <div className="flex items-center gap-3">
-          <button className="pastel-btn text-sm py-2 px-4">Login</button>
+          <NavbarAuth />
         </div>
       </nav>
 
@@ -130,7 +132,7 @@ export default function Navbar() {
                 </Link>
               ))}
               <hr className="my-4 border-[#4e3b4b]/20" />
-              <button className="pastel-btn w-full">Login</button>
+              <NavbarAuth />
             </div>
           </div>
         </div>
