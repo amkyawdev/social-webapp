@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { auth } from '@/lib/firebase'
 import { createClient } from '@/lib/supabase'
 import GlassCard from '@/components/ui/GlassCard'
 import PastelButton from '@/components/ui/PastelButton'
@@ -21,33 +23,23 @@ export default function SignupPage() {
     setLoading(true)
     setError('')
 
-    console.log('Signing up with:', email)
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      console.log('Signed up:', userCredential.user.email)
 
-    const { data, error: authError } = await supabase.auth.signUp({
-      email,
-      password
-    })
-
-    console.log('Signup response:', { data, authError })
-
-    if (authError) {
-      setError(authError.message)
-      setLoading(false)
-      return
-    }
-
-    // Create profile
-    if (data.user) {
-      const { error: profileError } = await supabase.from('profiles').insert({
-        id: data.user.id,
-        username,
+      // Create profile in Supabase
+      await supabase.from('profiles').insert({
+        id: userCredential.user.uid,
+        username: username || email.split('@')[0],
         status: 'active'
       })
-      console.log('Profile created:', profileError)
+
+      setSuccess(true)
+    } catch (err: any) {
+      console.error('Signup error:', err)
+      setError(err.message || 'Signup failed')
     }
 
-    // Show success message instead of redirecting immediately
-    setSuccess(true)
     setLoading(false)
   }
 

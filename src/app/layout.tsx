@@ -20,6 +20,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        {/* Firebase SDK */}
+        <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js" />
+        <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js" />
+      </head>
       <body>
         <ThreeLoader />
         <Navbar />

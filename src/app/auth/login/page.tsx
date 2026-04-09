@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
+import { auth } from '@/lib/firebase'
 import { createClient } from '@/lib/supabase'
 import GlassCard from '@/components/ui/GlassCard'
 import PastelButton from '@/components/ui/PastelButton'
@@ -19,16 +21,36 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    })
-
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-    } else {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      console.log('Logged in:', userCredential.user.email)
+      
+      // Create profile if not exists
+      await ensureProfile(userCredential.user.uid, userCredential.user.email || undefined)
+      
       router.push('/')
+    } catch (err: any) {
+      console.error('Login error:', err)
+      setError(err.message || 'Invalid login credentials')
+      setLoading(false)
+    }
+  }
+
+  async function ensureProfile(uid: string, email?: string) {
+    // Check if profile exists
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', uid)
+      .single()
+
+    if (!data) {
+      // Create profile
+      await supabase.from('profiles').insert({
+        id: uid,
+        username: email?.split('@')[0] || 'User',
+        status: 'active'
+      })
     }
   }
 

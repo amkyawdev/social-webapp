@@ -3,16 +3,17 @@
 /**
  * NavbarAuth Component
  * Shows Login button or user avatar/logout when authenticated
+ * Uses Firebase Auth
  * @module components/layout/NavbarAuth
  */
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase'
-import { User } from '@supabase/supabase-js'
+import { onAuthStateChanged, signOut, User } from 'firebase/auth'
+import { auth } from '@/lib/firebase'
 import { useRouter } from 'next/navigation'
 
 /**
- * NavbarAuth - Authentication-aware navigation element
+ * NavbarAuth - Authentication-aware navigation element using Firebase
  * @function NavbarAuth
  * @returns {JSX.Element} Login/Logout button with user avatar
  */
@@ -20,23 +21,18 @@ export default function NavbarAuth() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
-  const supabase = createClient()
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser)
       setLoading(false)
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [supabase])
+    return () => unsubscribe()
+  }, [])
 
   async function handleLogout() {
-    await supabase.auth.signOut()
+    await signOut(auth)
     router.push('/auth/login')
   }
 
