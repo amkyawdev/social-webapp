@@ -12,6 +12,7 @@ export default function SignupPage() {
   const [username, setUsername] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -20,10 +21,14 @@ export default function SignupPage() {
     setLoading(true)
     setError('')
 
+    console.log('Signing up with:', email)
+
     const { data, error: authError } = await supabase.auth.signUp({
       email,
       password
     })
+
+    console.log('Signup response:', { data, authError })
 
     if (authError) {
       setError(authError.message)
@@ -33,14 +38,36 @@ export default function SignupPage() {
 
     // Create profile
     if (data.user) {
-      await supabase.from('profiles').insert({
+      const { error: profileError } = await supabase.from('profiles').insert({
         id: data.user.id,
         username,
         status: 'active'
       })
+      console.log('Profile created:', profileError)
     }
 
-    router.push('/auth/login')
+    // Show success message instead of redirecting immediately
+    setSuccess(true)
+    setLoading(false)
+  }
+
+  if (success) {
+    return (
+      <div className="max-w-md mx-auto mt-8">
+        <GlassCard className="p-8 text-center">
+          <div className="text-5xl mb-4">✅</div>
+          <h1 className="text-2xl font-bold text-[#4e3b4b] mb-2">
+            Account Created!
+          </h1>
+          <p className="text-[#4e3b4b]/70 mb-6">
+            Your account has been created successfully. Please sign in with your credentials.
+          </p>
+          <a href="/auth/login" className="pastel-btn inline-block">
+            Go to Login →
+          </a>
+        </GlassCard>
+      </div>
+    )
   }
 
   return (
