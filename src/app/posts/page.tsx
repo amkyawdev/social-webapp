@@ -1,71 +1,29 @@
 /**
  * Posts Page Component
- * Server-side rendered page that fetches and displays posts from Supabase database
+ * Server-side rendered page that fetches posts from JSONL file
  * Implements the Pastel Glassmorphism design system with GlassCard components
- * Includes PostUploader for creating new posts
  * @module app/posts/page
  */
 
-import { createClient } from '@/lib/supabase'
 import GlassCard from '@/components/ui/GlassCard'
+import { getPosts, getUsers } from '@/lib/data'
 import PostUploader from '@/components/post/PostUploader'
-import FriendsList from '@/components/friends/FriendsList'
 
 /**
- * Post data interface from Supabase posts table
- * @interface Post
- * @property {number} id - Unique post identifier
- * @property {string} title - Post title
- * @property {string} content - Post body content
- * @property {string} created_at - ISO timestamp of creation
- * @property {string} user_id - Author's user ID
- */
-
-/**
- * Fetches posts from Supabase 'posts' table with author profiles
- * Retrieves up to 20 most recent posts ordered by creation date (descending)
- * @async
- * @function getPosts
- * @returns {Promise<Post[]>} Array of post objects or empty array on error
- */
-interface Post {
-  id: number
-  title: string
-  content: string
-  created_at: string
-  user_id: string
-  profiles?: {
-    username: string
-    avatar_url: string
-  }
-}
-
-async function getPosts() {
-  const supabase = createClient()
-  const { data, error } = await supabase
-    .from('posts')
-    .select('*, profiles(username, avatar_url)')
-    .order('created_at', { ascending: false })
-    .limit(20)
-
-  if (error) {
-    console.error('Error fetching posts:', error)
-    return []
-  }
-  return data as Post[] || []
-}
-
-/**
- * PostsPage - Main page component displaying community posts
- * Fetches posts server-side and renders using GlassCard components
- * Includes PostUploader form and FriendsList sidebar
- * Shows empty state if no posts exist in the database
+ * PostsPage - Main page displaying community posts from JSONL
  * @async
  * @function PostsPage
- * @returns {Promise<JSX.Element>} Posts page with list or empty state
+ * @returns {Promise<JSX.Element>} Posts page with list
  */
 export default async function PostsPage() {
-  const posts = await getPosts()
+  const posts = getPosts()
+  const users = getUsers()
+
+  // Map user_id to username
+  const getUsername = (userId: string) => {
+    const user = users.find(u => u.id === userId)
+    return user?.username || 'Unknown'
+  }
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -100,14 +58,13 @@ export default async function PostsPage() {
               {posts.map((post) => (
                 <GlassCard key={post.id} className="p-6">
                   <div className="flex items-start gap-4">
-                    {/* Avatar */}
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--pastel-pink)] to-[var(--pastel-lavender)] flex items-center justify-center text-xl font-bold text-[#4e3b4b] flex-shrink-0">
-                      {post.profiles?.username?.charAt(0).toUpperCase() || post.user_id?.charAt(0).toUpperCase() || '?'}
+                      {getUsername(post.user_id).charAt(0)}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="font-semibold text-[#4e3b4b]">
-                          {post.profiles?.username || post.user_id || 'Anonymous'}
+                          {getUsername(post.user_id)}
                         </span>
                         <span className="text-[#4e3b4b]/50 text-sm">
                           {new Date(post.created_at).toLocaleDateString()}
@@ -130,7 +87,31 @@ export default async function PostsPage() {
         {/* Sidebar */}
         <div className="hidden lg:block">
           <div className="sticky top-24">
-            <FriendsList />
+            <GlassCard className="p-4">
+              <h3 className="text-lg font-bold text-[#4e3b4b] mb-4">👥 Friends</h3>
+              {users.length === 0 ? (
+                <p className="text-[#4e3b4b]/50 text-sm text-center py-4">No users yet</p>
+              ) : (
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {users.map((user) => (
+                    <div key={user.id} className="flex items-center gap-3 p-2">
+                      <div className="relative">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--pastel-pink)] to-[var(--pastel-lavender)] flex items-center justify-center text-lg font-bold text-[#4e3b4b]">
+                          {user.username?.charAt(0)}
+                        </div>
+                        <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
+                          user.status === 'active' ? 'bg-green-400' : 'bg-gray-400'
+                        }`} />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-[#4e3b4b]">{user.username}</p>
+                        <p className="text-xs text-[#4e3b4b]/60">{user.status}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </GlassCard>
           </div>
         </div>
       </div>

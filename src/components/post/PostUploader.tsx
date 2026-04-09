@@ -3,24 +3,21 @@
 /**
  * PostUploader Component
  * Text-only post creation with GlassCard styling
- * Allows users to create posts and saves to Supabase
+ * Saves to JSONL file via API
  * @module components/post/PostUploader
  */
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase'
 import GlassCard from '@/components/ui/GlassCard'
 
 /**
  * PostUploader - Text input form for creating new posts
- * Features loading state and automatic refresh after posting
  * @function PostUploader
  * @returns {JSX.Element} Post creation form
  */
 export default function PostUploader() {
   const [content, setContent] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const supabase = createClient()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -28,19 +25,19 @@ export default function PostUploader() {
 
     setIsLoading(true)
 
-    const { error } = await supabase
-      .from('posts')
-      .insert({ 
+    // Send to API to save to JSONL
+    const res = await fetch('/api/posts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
         title: content.substring(0, 50),
-        content: content,
-        user_id: 'anonymous'
+        content: content
       })
+    })
 
-    if (!error) {
+    if (res.ok) {
       setContent('')
       window.location.reload()
-    } else {
-      console.error('Error creating post:', error)
     }
 
     setIsLoading(false)
