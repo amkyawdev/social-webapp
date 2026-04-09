@@ -1,14 +1,31 @@
 'use client'
 
+/**
+ * Navbar Component
+ * Responsive navigation bar with desktop and mobile layouts
+ * Features glassmorphism design with blob FAB button for mobile menu
+ * @module components/layout/Navbar
+ */
+
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 
+/**
+ * Navigation item structure
+ * @interface NavItem
+ * @property {string} label - Display text for navigation link
+ * @property {string} href - URL path for the link
+ */
 interface NavItem {
   label: string
   href: string
 }
 
+/**
+ * Navigation configuration array
+ * @constant {NavItem[]}
+ */
 const navItems: NavItem[] = [
   { label: 'Home', href: '/' },
   { label: 'Posts', href: '/posts' },
@@ -16,6 +33,14 @@ const navItems: NavItem[] = [
   { label: 'Group', href: '/group' },
 ]
 
+/**
+ * Navbar - Main navigation component with responsive design
+ * Desktop: Fixed glass panel with text navigation
+ * Mobile: Blob FAB button that opens slide-in sidebar menu
+ * Uses usePathname for active link highlighting
+ * @function Navbar
+ * @returns {JSX.Element} Navigation bar with desktop and mobile layouts
+ */
 export default function Navbar() {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)

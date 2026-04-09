@@ -1,9 +1,32 @@
 'use client'
 
+/**
+ * Chat Page Component
+ * Real-time chat application powered by Supabase Channels
+ * Supports live message updates and instant message sending
+ * @module app/chat/page
+ */
+
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import GlassCard from '@/components/ui/GlassCard'
 
+/**
+ * Message data interface from Supabase messages table
+ * @interface Message
+ * @property {number} id - Unique message identifier
+ * @property {string} content - Message text content
+ * @property {string} sender_id - ID of the message sender
+ * @property {string} created_at - ISO timestamp of message creation
+ */
+
+/**
+ * ChatPage - Real-time messaging interface with Supabase integration
+ * Uses Supabase Channels for live message updates and persistence
+ * Displays connection status and handles message sending
+ * @function ChatPage
+ * @returns {JSX.Element} Chat interface with messages and input form
+ */
 interface Message {
   id: number
   content: string

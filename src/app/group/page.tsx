@@ -1,6 +1,29 @@
+/**
+ * Group Page Component
+ * Server-side rendered page displaying user profiles with online status
+ * Fetches from Supabase profiles table with status indicators
+ * @module app/group/page
+ */
+
 import { createClient } from '@/lib/supabase'
 import GlassCard from '@/components/ui/GlassCard'
 
+/**
+ * Profile data interface from Supabase profiles table
+ * @interface Profile
+ * @property {string} id - Unique user identifier
+ * @property {string} username - User's display name
+ * @property {'active' | 'busy' | 'offline'} status - User's current status
+ * @property {string} [avatar_url] - Optional avatar image URL
+ */
+
+/**
+ * Fetches all user profiles from Supabase
+ * Retrieves profiles ordered alphabetically by username
+ * @async
+ * @function getProfiles
+ * @returns {Promise<Profile[]>} Array of profile objects or empty array on error
+ */
 interface Profile {
   id: string
   username: string
@@ -22,6 +45,12 @@ async function getProfiles() {
   return data as Profile[] || []
 }
 
+/**
+ * Maps status string to Tailwind CSS background color class
+ * @function getStatusColor
+ * @param {string} status - User status string
+ * @returns {string} CSS class for status indicator color
+ */
 function getStatusColor(status: string) {
   switch (status) {
     case 'active':
@@ -33,6 +62,12 @@ function getStatusColor(status: string) {
   }
 }
 
+/**
+ * Maps status string to human-readable status text
+ * @function getStatusText
+ * @param {string} status - User status string
+ * @returns {string} Human-readable status label
+ */
 function getStatusText(status: string) {
   switch (status) {
     case 'active':
@@ -44,6 +79,13 @@ function getStatusText(status: string) {
   }
 }
 
+/**
+ * GroupPage - Main page displaying user profiles with status indicators
+ * Fetches profiles server-side and renders profile cards with status
+ * @async
+ * @function GroupPage
+ * @returns {Promise<JSX.Element>} Group page with profile cards
+ */
 export default async function GroupPage() {
   const profiles = await getProfiles()
 
